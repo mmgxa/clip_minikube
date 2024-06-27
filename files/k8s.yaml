@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clip-deployment
+  labels:
+    app: clip
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: clip
+  template:
+    metadata:
+      labels:
+        app: clip
+    spec:
+      containers:
+        - name: clip
+          image: clip:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clip-service
+spec:
+  selector:
+    app: clip
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: clip-ingress
+spec:
+  rules:
+    - host: clip.model
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: clip-service
+                port:
+                  number: 80
